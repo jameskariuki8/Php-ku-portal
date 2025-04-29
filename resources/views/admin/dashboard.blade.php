@@ -30,13 +30,13 @@
                 </div>
                 
                 <div class="space-y-1 px-3">
-                    <a href="#" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
+                    <a href="{{ route('admin.teacher.add') }}" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
                         <i class="fas fa-plus-circle mr-3 text-indigo-500"></i> Add Teacher
                     </a>
-                    <a href="#" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
+                    <a href="{{ route('admin.teacher.view') }}" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
                         <i class="fas fa-eye mr-3 text-indigo-500"></i> View Teachers
                     </a>
-                    <a href="#" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
+                    <a href="{{ route('admin.courses.view') }}" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
                         <i class="fas fa-list-alt mr-3 text-indigo-500"></i> View Course
                     </a>
                     <a href="#" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
@@ -49,7 +49,7 @@
                 </div>
                 
                 <div class="space-y-1 px-3">
-                    <a href="#" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
+                    <a href="{{ route('admin.courses.add') }}" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
                         <i class="fas fa-plus-circle mr-3 text-indigo-500"></i> Add Courses
                     </a>
                     <a href="#" class="sidebar-item block px-4 py-3 rounded-lg text-gray-700 font-medium transition duration-200">
@@ -89,12 +89,15 @@
                             <i class="fas fa-bell"></i>
                         </button>
                         <div class="relative">
-                            <button class="flex items-center space-x-2 focus:outline-none">
-                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                                    A
-                                </div>
-                            </button>
-                        </div>
+                         <button class="flex items-center space-x-2 focus:outline-none">
+                          <div class="min-w-max px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 font-semibold">
+                                @auth
+                                   {{ Auth::user()->name }}
+                                @endauth
+                         </div>
+                      </button>
+                   </div>
+
                     </div>
                 </div>
             </header>

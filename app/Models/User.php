@@ -21,7 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // <-- ADD THIS
+        'role', 
+        'phone',
+        'department',
+        'qualifications',
     ];
 
     /**
@@ -55,4 +58,6 @@ class User extends Authenticatable
     {
         return $this->role === 'student'; // Return true if role is 'student'
     }
+
+    
 }

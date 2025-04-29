@@ -16,21 +16,23 @@
             </div>
             
             <nav class="mt-6">
-                <div class="px-6 py-3 bg-indigo-900 font-medium">
-                    <span class="flex items-center">
-                        <i class="fas fa-bars mr-3"></i>
-                        Enroll Course
-                    </span>
-                </div>
+                <a href="{{ route('student.enroll') }}" 
+                   class="block px-6 py-3 {{ request()->routeIs('student.enroll') ? 'bg-indigo-700' : 'text-indigo-200 hover:bg-indigo-700' }} transition duration-200">
+                    <i class="fas fa-book mr-3"></i> Course Enrollment
+                </a>
                 
-                <a href="#" class="block px-6 py-3 mt-2 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
-                    <i class="fas fa-envelope mr-3"></i> Register Units
+                @if(auth()->user()->enrolledCourse)
+                <a href="{{ route('student.units') }}" 
+                   class="block px-6 py-3 {{ request()->routeIs('student.units') ? 'bg-indigo-700' : 'text-indigo-200 hover:bg-indigo-700' }} transition duration-200">
+                    <i class="fas fa-tasks mr-3"></i> Unit Registration
+                </a>
+                @endif
+                
+                <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
+                    <i class="fas fa-chart-bar mr-3"></i> View Results
                 </a>
                 <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
-                    <i class="fas fa-book mr-3"></i> View Results
-                </a>
-                <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
-                    <i class="fas fa-chart-bar mr-3"></i> Pay Fee
+                    <i class="fas fa-credit-card mr-3"></i> Pay Fee
                 </a>
             </nav>
         </div>
@@ -45,17 +47,18 @@
                     <div class="flex items-center space-x-4">
                         <div class="relative">
                             <button class="flex items-center space-x-2 focus:outline-none">
-                                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">
-                                    FP
+                                <div class="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl">
+                                    {{ substr(auth()->user()->name, 0, 1) }}
                                 </div>
-                                <span class="text-gray-700">First Name</span>
-                                <i class="fas fa-chevron-down text-gray-500"></i>
                             </button>
                             
                             <!-- Dropdown Menu -->
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden" id="profileDropdown">
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100">View Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100">Logout</a>
+                                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100">
+                                    Logout
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -67,8 +70,36 @@
                 <div class="max-w-7xl mx-auto">
                     <!-- Welcome Card -->
                     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Welcome back, First Name!</h3>
-                        <p class="text-gray-600">Here's what's happening with your courses today.</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Welcome back, {{ auth()->user()->name }}</h3>
+                        
+                        @if(auth()->user()->enrolledCourse)
+                            <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                <h4 class="font-medium text-blue-800">Currently Enrolled In:</h4>
+                                <p class="text-lg mt-1">{{ auth()->user()->enrolledCourse->course->title }}</p>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    {{ auth()->user()->unitRegistrations->count() }} units registered
+                                </p>
+                                
+                                <div class="mt-4 space-x-3">
+                                    <a href="{{ route('student.units') }}" 
+                                       class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">
+                                        Manage Units
+                                    </a>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
+                                <h4 class="font-medium text-yellow-800">No Active Enrollment</h4>
+                                <p class="mt-1">You need to enroll in a course to register for units.</p>
+                                
+                                <div class="mt-3">
+                                    <a href="{{ route('student.enroll') }}" 
+                                       class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">
+                                        Enroll in Course
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Stats Cards -->
@@ -76,11 +107,13 @@
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <div class="flex items-center">
                                 <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
-                                    <i class="fas fa-envelope fa-lg"></i>
+                                    <i class="fas fa-book fa-lg"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">Email Course</p>
-                                    <p class="text-xl font-semibold text-gray-900">3 New</p>
+                                    <p class="text-sm font-medium text-gray-500">Enrolled Course</p>
+                                    <p class="text-xl font-semibold text-gray-900">
+                                        {{ auth()->user()->enrolledCourse ? auth()->user()->enrolledCourse->course->title : 'None' }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -88,11 +121,14 @@
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <div class="flex items-center">
                                 <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                                    <i class="fas fa-book fa-lg"></i>
+                                    <i class="fas fa-tasks fa-lg"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">Master Units</p>
-                                    <p class="text-xl font-semibold text-gray-900">5 Active</p>
+                                    <p class="text-sm font-medium text-gray-500">Registered Units</p>
+                                    <p class="text-xl font-semibold text-gray-900">
+                                    {{ auth()->user()->unitRegistrations?->count() ?? 0 }}
+
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -100,11 +136,14 @@
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <div class="flex items-center">
                                 <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                                    <i class="fas fa-chart-bar fa-lg"></i>
+                                    <i class="fas fa-check-circle fa-lg"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">View Results</p>
-                                    <p class="text-xl font-semibold text-gray-900">2 Updated</p>
+                                    <p class="text-sm font-medium text-gray-500">Completed Units</p>
+                                    <p class="text-xl font-semibold text-gray-900">
+                                    {{ collect(auth()->user()->unitRegistrations)->where('status', 'completed')->count() }}
+
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -114,26 +153,54 @@
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
                         <div class="space-y-4">
+                            @if(auth()->user()->enrolledCourse)
+                                @forelse(auth()->user()->unitRegistrations()->latest()->take(3)->get() as $registration)
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            Registered for {{ $registration->unit->title }}
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            {{ $registration->unit->course->title }}
+                                        </p>
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            {{ $registration->created_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                        <i class="fas fa-info-circle"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            No recent unit registrations
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            Register for units in your enrolled course
+                                        </p>
+                                    </div>
+                                </div>
+                                @endforelse
+                            @else
                             <div class="flex items-start">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                                    <i class="fas fa-book"></i>
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                                    <i class="fas fa-exclamation-circle"></i>
                                 </div>
                                 <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-900">New unit available</p>
-                                    <p class="text-sm text-gray-500">Mathematics Unit 4 is now available</p>
-                                    <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        No course enrollment
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        Enroll in a course to view your activity
+                                    </p>
                                 </div>
                             </div>
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-900">Assignment submitted</p>
-                                    <p class="text-sm text-gray-500">Your Science assignment was submitted</p>
-                                    <p class="text-xs text-gray-400 mt-1">1 day ago</p>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -141,19 +208,24 @@
         </div>
     </div>
 
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        @csrf
+    </form>
+
     <script>
         // Simple JavaScript for dropdown functionality
         document.addEventListener('DOMContentLoaded', function() {
             const profileButton = document.querySelector('.relative button');
-            const dropdownMenu = document.querySelector('.relative .hidden');
+            const dropdownMenu = document.getElementById('profileDropdown');
             
-            profileButton.addEventListener('click', function() {
+            profileButton.addEventListener('click', function(e) {
+                e.stopPropagation();
                 dropdownMenu.classList.toggle('hidden');
             });
             
             // Close dropdown when clicking outside
             document.addEventListener('click', function(event) {
-                if (!profileButton.contains(event.target) {
+                if (!event.target.closest('.relative')) {
                     dropdownMenu.classList.add('hidden');
                 }
             });

@@ -18,7 +18,7 @@
                         </svg>
                     </button>
                     <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                        <a href="{{ route('teacher.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">View Profile</a>
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Edit Profile</a>
                         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Logout</a>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                     <h3 class="text-lg font-semibold text-white">Quick Actions</h3>
                 </div>
                 <div class="p-6 grid grid-cols-2 gap-4">
-                    <a href="#" class="flex flex-col items-center justify-center p-4 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition">
+                    <a href="{{ route('admin.teacher.units') }}" class="flex flex-col items-center justify-center p-4 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition">
                         <svg class="h-8 w-8 text-indigo-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
@@ -119,7 +119,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($courses->take(3)->flatMap->students as $student)
+                         {{--   @foreach($courses->take(3)->flatMap->students as $student)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
@@ -143,7 +143,7 @@
                                     <a href="#" class="text-blue-600 hover:text-blue-900">Grade</a>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
