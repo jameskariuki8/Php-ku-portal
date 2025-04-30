@@ -6,6 +6,8 @@
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <style>
         .sidebar-item.active {
             background-color: #4f46e5;
@@ -89,13 +91,31 @@
                             <i class="fas fa-bell"></i>
                         </button>
                         <div class="relative">
-                         <button class="flex items-center space-x-2 focus:outline-none">
-                          <div class="min-w-max px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 font-semibold">
-                                @auth
-                                   {{ Auth::user()->name }}
-                                @endauth
-                         </div>
-                      </button>
+                        <div class="relative group">
+               <!-- Profile Dropdown (Click-based using Alpine.js) -->
+<div class="relative" x-data="{ open: false }">
+    <!-- Trigger: Username + SVG -->
+    <div @click="open = !open" class="flex items-center space-x-2 cursor-pointer">
+        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition">
+            {{ auth()->user()->name }}
+        </span>
+        <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+    </div>
+
+    <!-- Dropdown Menu -->
+    <div x-show="open" @click.outside="open = false" x-transition
+         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 py-1">
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+            @csrf
+        </form>
+        <a href="{{ route('logout') }}" 
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+           class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Logout</a>
+    </div>
+</div>
+
                    </div>
 
                     </div>

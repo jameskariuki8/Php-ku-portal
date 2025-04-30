@@ -6,6 +6,8 @@
     <title>Student Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body class="bg-gray-100 font-sans">
     <div class="flex h-screen">
@@ -44,24 +46,33 @@
                 <div class="flex justify-between items-center px-6 py-4">
                     <h2 class="text-xl font-semibold text-gray-800">Dashboard</h2>
                     
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button class="flex items-center space-x-2 focus:outline-none">
-                                <div class="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl">
-                                    {{ substr(auth()->user()->name, 0, 1) }}
-                                </div>
-                            </button>
-                            
-                            <!-- Dropdown Menu -->
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden" id="profileDropdown">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100">View Profile</a>
-                                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
-                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100">
-                                    Logout
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- User Avatar with Dropdown -->
+<div class="flex items-center space-x-4">
+    <div class="relative" x-data="{ open: false }">
+        <!-- Button with Avatar and SVG Dropdown Toggle -->
+        <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+            <!-- Avatar Circle -->
+            <div class="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl">
+                {{ Str::limit(auth()->user()->name) }}
+            </div>
+            <!-- Dropdown Arrow -->
+            <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div x-show="open" @click.outside="open = false" x-transition
+             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 py-1">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                @csrf
+            </form>
+            <a href="{{ route('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100">Logout</a>
+        </div>
+    </div>
+</div>
                 </div>
             </header>
 

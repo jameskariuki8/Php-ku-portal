@@ -3,6 +3,25 @@
 @section('title', 'Manage Units')
 
 @section('content')
+<header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-900">Teacher Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <!-- Profile dropdown -->
+                <div class="relative">
+                    <button id="profileDropdown" class="flex items-center space-x-2 focus:outline-none">
+                        <span class="text-gray-700">{{ auth()->user()->name }}</span>
+                        <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Edit Profile</a>
+                        <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 <div class="bg-gradient-to-b from-blue-50 to-white min-h-screen py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-8">
