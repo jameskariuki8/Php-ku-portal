@@ -37,4 +37,8 @@ class StudentCourseEnrollment extends Model
         return $this->belongsToMany(Unit::class, 'student_unit_registrations', 'enrollment_id', 'unit_id')
             ->withPivot('status', 'registration_date');
     }
+    protected $casts = [
+        'enrollment_date' => 'datetime',
+    ];
+    
 }

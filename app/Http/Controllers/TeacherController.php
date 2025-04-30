@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\student\StudentCourseEnrollment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -43,4 +43,14 @@ class TeacherController extends Controller
         $teachers = User::where('role', 'teacher')->latest()->get();
         return view('admin.teacher.view', compact('teachers'));
     }
+
+    public function indx()
+{
+    $enrollments = StudentCourseEnrollment::with(['student', 'course'])
+        ->latest()
+        ->take(10)
+        ->get();
+    
+    return view('your.view', compact('enrollments'));
+}
 }

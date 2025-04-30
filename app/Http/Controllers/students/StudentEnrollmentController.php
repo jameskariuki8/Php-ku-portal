@@ -1,6 +1,6 @@
 <?php
-// app/Http/Controllers/Student/EnrollmentController.php
-namespace App\Http\Controllers\Student;
+
+namespace App\Http\Controllers\Students;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
@@ -11,35 +11,37 @@ use Illuminate\Support\Facades\Auth;
 class StudentEnrollmentController extends Controller
 {
     public function index()
-    {
-        $courses = Course::active()->get();
-        $enrollment = Auth::user()->enrolledCourse()->with('course')->first();
-        
-        return view('student.enroll', compact('courses', 'enrollment'));
-    }
+{
+    $enrollment = auth()->user()->load('enrollment.course')->enrollment;
 
-    public function store(Request $request)
-    {
-        $user = Auth::user();
-        
-        // Check if student already has an active enrollment
-        if ($user->enrolledCourse()->exists()) {
-            return back()->with('error', 'You are already enrolled in a course.');
-        }
-        
-        $validated = $request->validate([
-            'course_id' => 'required|exists:courses,id',
-        ]);
-        
-        $enrollment = $user->enrolledCourse()->create([
-            'course_id' => $validated['course_id'],
-            'enrollment_date' => now(),
-            'status' => 'active'
-        ]);
-        
-        return redirect()->route('student.enroll')
-            ->with('success', 'Successfully enrolled in course!');
+   $courses = Course::all(); // or however you're retrieving course options
+
+return view('student.enroll.index', compact('enrollment', 'courses'));
+
+}
+public function store(Request $request)
+{
+    $user = Auth::user();
+    
+    // Check if student already has an active enrollment
+    if ($user->enrollment()->exists()) {
+        return back()->with('error', 'You are already enrolled in a course.');
     }
+    
+    $validated = $request->validate([
+        'course_id' => 'required|exists:courses,id',
+    ]);
+    
+    $enrollment = $user->enrollment()->create([
+        'course_id' => $validated['course_id'],
+        'enrollment_date' => now(),
+        'status' => 'active'
+    ]);
+    
+    return redirect()->route('student.enroll')
+        ->with('success', 'Successfully enrolled in course!');
+}
+
 
     public function destroy(StudentCourseEnrollment $enrollment)
     {
@@ -58,4 +60,5 @@ class StudentEnrollmentController extends Controller
         return redirect()->route('student.enroll')
             ->with('success', 'Successfully withdrawn from course.');
     }
+    
 }

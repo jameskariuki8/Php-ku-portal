@@ -1,6 +1,6 @@
 <?php
 // app/Http/Controllers/Student/UnitRegistrationController.php
-namespace App\Http\Controllers\Student;
+namespace App\Http\Controllers\Students;
 
 use App\Http\Controllers\Controller;
 use App\Models\StudentCourseEnrollment;

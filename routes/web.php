@@ -4,8 +4,8 @@ use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UnitController;
-use App\Http\Controllers\student\StudentEnrollmentController;
-use App\Http\Controllers\UnitRegistrationController;
+use App\Http\Controllers\students\StudentEnrollmentController;
+use App\Http\Controllers\students\UnitRegistrationController;
 
 // Home Route
 Route::get('/', function () {
@@ -81,10 +81,10 @@ Route::middleware('auth')->prefix('student')->group(function () {
     Route::delete('/enroll/{enrollment}', [\App\Http\Controllers\students\StudentEnrollmentController::class, 'destroy']);
     
     // Unit registration routes
-    Route::get('/units', [\App\Http\Controllers\UnitRegistrationController::class, 'index'])
+    Route::get('/units', [\App\Http\Controllers\students\UnitRegistrationController::class, 'index'])
         ->name('student.units');
-    Route::post('/units', [\App\Http\Controllers\UnitRegistrationController::class, 'store']);
-    Route::delete('/units/{registration}', [\App\Http\Controllers\UnitRegistrationController::class, 'destroy']);
+    Route::post('/units', [\App\Http\Controllers\students\UnitRegistrationController::class, 'store']);
+    Route::delete('/units/{registration}', [\App\Http\Controllers\students\UnitRegistrationController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';

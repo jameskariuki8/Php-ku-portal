@@ -72,13 +72,14 @@
                     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-2">Welcome back, {{ auth()->user()->name }}</h3>
                         
-                        @if(auth()->user()->enrolledCourse)
+                                 @if(auth()->user()->enrolledCourse)
                             <div class="mt-4 p-4 bg-blue-50 rounded-lg">
                                 <h4 class="font-medium text-blue-800">Currently Enrolled In:</h4>
                                 <p class="text-lg mt-1">{{ auth()->user()->enrolledCourse->course->title }}</p>
                                 <p class="text-sm text-gray-600 mt-1">
-                                    {{ auth()->user()->unitRegistrations->count() }} units registered
+                                    {{ auth()->user()->unitRegistrations ? auth()->user()->unitRegistrations->count() : 0 }} units registered
                                 </p>
+
                                 
                                 <div class="mt-4 space-x-3">
                                     <a href="{{ route('student.units') }}" 
@@ -124,12 +125,12 @@
                                     <i class="fas fa-tasks fa-lg"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">Registered Units</p>
-                                    <p class="text-xl font-semibold text-gray-900">
-                                    {{ auth()->user()->unitRegistrations?->count() ?? 0 }}
+    <p class="text-sm font-medium text-gray-500">Registered Units</p>
+    <p class="text-xl font-semibold text-gray-900">
+        {{ auth()->user()->enrollment?->unitRegistrations?->count() ?? 0 }}
+    </p>
+</div>
 
-                                    </p>
-                                </div>
                             </div>
                         </div>
                         

@@ -1,8 +1,15 @@
-@extends('layouts.student')
 
-@section('title', 'Unit Registration')
 
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Registration</title>
+    <!-- Add Tailwind CSS if not already included -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
 <div class="bg-gradient-to-b from-blue-50 to-white min-h-screen py-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm rounded-lg p-6">
@@ -40,7 +47,7 @@
                                                 <h4 class="font-medium text-gray-900">{{ $unit->title }}</h4>
                                                 <p class="text-sm text-gray-600 mt-1">{{ Str::limit($unit->description, 100) }}</p>
                                             </div>
-                                            <form action="{{ route('student.units') }}" method="POST">
+                                            <form action="{{ route('student.units.store') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="unit_id" value="{{ $unit->id }}">
                                                 <button type="submit" 
@@ -71,7 +78,7 @@
                                             <h4 class="font-medium text-gray-900">{{ $unit->title }}</h4>
                                             <p class="text-sm text-gray-600 mt-1">{{ Str::limit($unit->description, 100) }}</p>
                                             <p class="text-xs text-gray-500 mt-2">
-                                                Registered on: {{ $unit->pivot->registration_date->format('M d, Y') }}
+                                                Registered on: {{ \Carbon\Carbon::parse($unit->pivot->registration_date)->format('M d, Y') }}
                                             </p>
                                         </div>
                                         <form action="{{ route('student.units', $unit->pivot->id) }}" method="POST">
@@ -95,4 +102,5 @@
         </div>
     </div>
 </div>
-@endsection
+</body>
+</html>
