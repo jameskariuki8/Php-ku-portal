@@ -1,5 +1,6 @@
 <?php
 
+// app/Mail/GradeNotification.php
 namespace App\Mail;
 
 use App\Models\Grade;
@@ -22,11 +23,7 @@ class GradeNotification extends Mailable
 
     public function build()
     {
-        return $this->subject('Your Grade for ' . $this->grade->unit->name)
-                    ->markdown('emails.grade-notification')
-                    ->attach(storage_path('app/' . $this->grade->file_path), [
-                        'as' => 'grade_' . $this->grade->unit->code . '.pdf',
-                        'mime' => 'application/pdf',
-                    ]);
+        return $this->subject('Your Grade for '.$this->grade->unit->title)
+            ->markdown('emails.grade-notification');
     }
 }

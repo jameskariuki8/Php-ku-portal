@@ -31,4 +31,13 @@ class Unit extends Model
     {
         return $this->hasMany(StudentUnitRegistration::class, 'unit_id');
     }
+    // app/Models/Unit.php
+public function students()
+{
+    return $this->belongsToMany(User::class, 'student_unit_registrations', 'unit_id', 'enrollment_id')
+        ->using(StudentUnitRegistration::class)
+        ->where('role', 'student');
+}
+
+
 }

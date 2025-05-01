@@ -1,19 +1,24 @@
+
+
+{{-- resources/views/emails/grade-notification.blade.php --}}
 @component('mail::message')
-# Grade Notification
+# Grade Notification for {{ $grade->unit->title }}
 
-Dear {{ $grade->student->name }},
+Hello {{ $grade->student->name }},
 
-Your grade for the unit **{{ $grade->unit->name }}** ({{ $grade->unit->code }}) has been uploaded by your teacher.
+Your grade for **{{ $grade->unit->title }}** has been recorded:
+
+- CAT Marks: {{ $grade->cat_marks ?? 'N/A' }}
+- Exam Marks: {{ $grade->exam_marks ?? 'N/A' }}
+- Final Grade: **{{ $grade->grade }}**
 
 @if($message)
-**Message from your teacher:**  
+**Teacher's Note:**  
 {{ $message }}
 @endif
 
-You can view this grade in your student dashboard or download the attached PDF file.
-
-@component('mail::button', ['url' => url('/student/dashboard')])
-View in Dashboard
+@component('mail::button', ['url' => route('student.grades.view')])
+View All Grades
 @endcomponent
 
 Thanks,  

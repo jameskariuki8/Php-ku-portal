@@ -62,9 +62,8 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/email/verify/{id}/{hash}', [VerifiedController::class, 'verify'])->middleware(['auth'])->name('verification.verify');
 });
-
 // Teacher routes group
-Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->group(function () {
+Route::prefix('teacher')->group(function () {
     // Units management
     Route::get('/units', [UnitController::class, 'index'])->name('admin.teacher.units');
     Route::get('/units/create', [UnitController::class, 'create'])->name('admin.teacher.units.create');

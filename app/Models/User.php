@@ -101,6 +101,15 @@ public function units()
         'unit_id'
     );
 }
+// app/Models/User.php
+public function enrolledUnits()
+{
+    return $this->belongsToMany(Unit::class, 'student_unit_registrations', 'enrollment_id', 'unit_id')
+        ->using(StudentUnitRegistration::class)
+        ->withPivot(['created_at', 'updated_at']);
+}
+
+
 
 
 }
