@@ -89,4 +89,18 @@ public function unitRegistrations()
     return $this->hasMany(StudentUnitRegistration::class, 'enrollment_id', 'id');
 }
 
+// In User.php
+public function units()
+{
+    return $this->hasManyThrough(
+        Unit::class,
+        StudentUnitRegistration::class,
+        'enrollment_id',
+        'id',
+        'id',
+        'unit_id'
+    );
+}
+
+
 }

@@ -1,15 +1,9 @@
+@extends('layouts.student')
 
+@section('title', 'Unit Registration')
+@section('header', 'Unit Registation')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unit Registration</title>
-    <!-- Add Tailwind CSS if not already included -->
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
+@section('content')
 <div class="bg-gradient-to-b from-blue-50 to-white min-h-screen py-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm rounded-lg p-6">
@@ -81,15 +75,16 @@
                                                 Registered on: {{ \Carbon\Carbon::parse($unit->pivot->registration_date)->format('M d, Y') }}
                                             </p>
                                         </div>
-                                        <form action="{{ route('student.units', $unit->pivot->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-md hover:bg-red-200"
-                                                    onclick="return confirm('Are you sure you want to drop this unit?')">
-                                                Drop
-                                            </button>
-                                        </form>
+                                        <form action="{{ route('student.units.destroy', $unit->id) }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <button type="submit" 
+            class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+            onclick="return confirm('Are you sure you want to drop this unit?')">
+        Drop Unit
+    </button>
+</form>
+                                        
                                     </div>
                                 </div>
                             @endforeach
@@ -102,5 +97,4 @@
         </div>
     </div>
 </div>
-</body>
-</html>
+@endsection

@@ -1,6 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\Student;
+use App\Models\Unit;
+use App\Models\Grade;
 use App\Models\student\StudentCourseEnrollment;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -44,13 +48,39 @@ class TeacherController extends Controller
         return view('admin.teacher.view', compact('teachers'));
     }
 
-    public function indx()
-{
-    $enrollments = StudentCourseEnrollment::with(['student', 'course'])
-        ->latest()
-        ->take(10)
-        ->get();
+    public function enrollments()
+    {
+        $enrollments = StudentCourseEnrollment::with(['student', 'course'])
+            ->latest()
+            ->take(10)
+            ->get();
+        
+        return view('teacher.enrollments', compact('enrollments'));
+    }
+
+    public function dashboard()
+    {
+        $teacher = auth()->user();
     
-    return view('your.view', compact('enrollments'));
-}
-}
+        // Get only students enrolled in units taught by this teacher
+        $students = User::where('role', 'student')
+            ->whereHas('enrollment.unitRegistrations.unit', function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+    
+        // Get units this teacher teaches
+        $units = Unit::where('teacher_id', $teacher->id)->get();
+    
+        // Get grades
+        $grades = Grade::with(['student:id,name', 'unit:id,name'])
+            ->where('teacher_id', $teacher->id)
+            ->latest()
+            ->get();
+    
+        return view('admin.teacher.dashboard', compact('students', 'units', 'grades'));
+    }
+
+    
+}  

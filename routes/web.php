@@ -4,8 +4,10 @@ use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\GradeController; // Make sure to add this
 use App\Http\Controllers\students\StudentEnrollmentController;
 use App\Http\Controllers\students\UnitRegistrationController;
+use App\Http\Controllers\students\StudentGradeController; // Add this for student grades
 
 // Home Route
 Route::get('/', function () {
@@ -31,10 +33,12 @@ Route::middleware('auth')->group(function () {
     })->middleware(['auth', 'verified'])->name('admin.dashboard');
     
     // Teacher Dashboard Route
-    Route::get('/teacher/dashboard', function () {
-        return view('admin.teacher.dashboard');
-    })->middleware(['auth', 'verified'])->name('admin.teacher.dashboard');
-    
+    Route::get('/teacher/dashboard', [TeacherController::class, 'dashboard'])
+        ->middleware(['auth', 'verified'])
+        ->name('admin.teacher.dashboard');
+        Route::get('/teacher/student-details/{student}', [TeacherController::class, 'getStudentDetails'])
+    ->middleware('auth:teacher');
+
     // Student Dashboard Route
     Route::get('/student/dashboard', function () {
         return view('student.dashboard');
@@ -59,10 +63,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/email/verify/{id}/{hash}', [VerifiedController::class, 'verify'])->middleware(['auth'])->name('verification.verify');
 });
 
-// Teacher routes
-Route::middleware(['auth'])->prefix('teacher')->group(function () {
-    
-
+// Teacher routes group
+Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->group(function () {
     // Units management
     Route::get('/units', [UnitController::class, 'index'])->name('admin.teacher.units');
     Route::get('/units/create', [UnitController::class, 'create'])->name('admin.teacher.units.create');
@@ -70,21 +72,47 @@ Route::middleware(['auth'])->prefix('teacher')->group(function () {
     Route::get('/units/{unit}/edit', [UnitController::class, 'edit'])->name('admin.teacher.units.edit');
     Route::put('/units/{unit}', [UnitController::class, 'update'])->name('admin.teacher.units.update');
     Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('admin.teacher.units.destroy');
+    
+    // Grade management routes
+    Route::get('/student-details/{student}', [TeacherController::class, 'getStudentDetails'])
+        ->name('teacher.student.details');
+        
+    Route::post('/grades/submit', [TeacherController::class, 'submitGrades'])
+        ->name('teacher.grades.submit');
+        
+    Route::post('/grades/upload', [GradeController::class, 'upload'])
+        ->name('teacher.grades.upload');
+        
+    Route::post('/grades/send', [GradeController::class, 'send'])
+        ->name('teacher.grades.send');
+        
+    Route::get('/units/{student}', [TeacherController::class, 'getStudentUnits'])
+        ->name('admin.teacher.units.student');
 });
 
-// routes/web.php
-Route::middleware('auth')->prefix('student')->group(function () {
+// Student routes group
+Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->group(function () {
     // Enrollment routes
-    Route::get('/enroll', [\App\Http\Controllers\students\StudentEnrollmentController::class, 'index'])
+    Route::get('/enroll', [StudentEnrollmentController::class, 'index'])
         ->name('student.enroll');
-    Route::post('/enroll', [\App\Http\Controllers\students\StudentEnrollmentController::class, 'store']);
-    Route::delete('/enroll/{enrollment}', [\App\Http\Controllers\students\StudentEnrollmentController::class, 'destroy']);
+    Route::post('/enroll', [StudentEnrollmentController::class, 'store']);
+    Route::delete('/enroll/{enrollment}', [StudentEnrollmentController::class, 'destroy']);
     
     // Unit registration routes
-    Route::get('/units', [\App\Http\Controllers\students\UnitRegistrationController::class, 'index'])
-        ->name('student.units');
-    Route::post('/units', [\App\Http\Controllers\students\UnitRegistrationController::class, 'store']);
-    Route::delete('/units/{registration}', [\App\Http\Controllers\students\UnitRegistrationController::class, 'destroy']);
+    Route::get('/units', [UnitRegistrationController::class, 'index'])
+        ->name('student.units.index');
+    Route::post('/units', [UnitRegistrationController::class, 'store'])
+        ->name('student.units.store');
+    Route::delete('/units/{unitId}', [UnitRegistrationController::class, 'destroy'])
+        ->name('student.units.destroy');
+
+    // Grade viewing routes
+    Route::get('/grades', [StudentGradeController::class, 'index'])
+        ->name('student.grades.index');
+    Route::get('/grades/{grade}/download', [StudentGradeController::class, 'download'])
+        ->name('student.grades.download');
+    Route::get('/grades/{grade}/view', [StudentGradeController::class, 'view'])
+        ->name('student.grades.view');
 });
 
 require __DIR__.'/auth.php';

@@ -24,13 +24,13 @@
                 </a>
                 
                 @if(auth()->user()->enrolledCourse)
-                <a href="{{ route('student.units') }}" 
+                <a href="{{ route('student.units.index') }}" 
                    class="block px-6 py-3 {{ request()->routeIs('student.units') ? 'bg-indigo-700' : 'text-indigo-200 hover:bg-indigo-700' }} transition duration-200">
                     <i class="fas fa-tasks mr-3"></i> Unit Registration
                 </a>
                 @endif
                 
-                <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
+                <a href="{{ route('student.grades.index') }}" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
                     <i class="fas fa-chart-bar mr-3"></i> View Results
                 </a>
                 <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
@@ -88,12 +88,12 @@
                                 <h4 class="font-medium text-blue-800">Currently Enrolled In:</h4>
                                 <p class="text-lg mt-1">{{ auth()->user()->enrolledCourse->course->title }}</p>
                                 <p class="text-sm text-gray-600 mt-1">
-                                    {{ auth()->user()->unitRegistrations ? auth()->user()->unitRegistrations->count() : 0 }} units registered
+                                {{ auth()->user()->enrollment?->unitRegistrations?->count() ?? 0 }} units registered
                                 </p>
 
                                 
                                 <div class="mt-4 space-x-3">
-                                    <a href="{{ route('student.units') }}" 
+                                    <a href="{{ route('student.units.index') }}" 
                                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">
                                         Manage Units
                                     </a>
