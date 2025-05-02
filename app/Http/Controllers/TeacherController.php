@@ -74,88 +74,124 @@ class TeacherController extends Controller
         $units = Unit::where('teacher_id', $teacher->id)->get();
     
         // Get grades
-        $grades = Grade::with(['student:id,name', 'unit:id,name'])
+        $grades = Grade::with(['student:id,name', 'unit:id,title'])
             ->where('teacher_id', $teacher->id)
             ->latest()
             ->get();
     
         return view('admin.teacher.dashboard', compact('students', 'units', 'grades'));
     }
-// In TeacherController
-public function getStudentDetails(User $student)
-{
-    // Verify the student is enrolled in this teacher's units
-    if (!$student->units()->whereHas('teacher', function ($query) {
-        $query->where('id', auth()->id());
-    })->exists()) {
-        return response()->json([
-            'error' => 'Unauthorized access to student data'
-        ], 403);
+
+    public function getStudentDetails(User $student)
+    {
+        try {
+            // Load the student with their course and unit registrations
+            $student->load([
+                'enrollment.course',
+                'enrollment.registeredUnits.grades' => function($query) use ($student) {
+                    $query->where('student_id', $student->id)
+                          ->where('teacher_id', auth()->id());
+                }
+            ]);
+            
+            if (!$student->enrollment) {
+                return response()->json([
+                    'error' => 'Student is not enrolled in any course',
+                    'student_id' => $student->id,
+                    'student_name' => $student->name
+                ], 404);
+            }
+
+            if (!$student->enrollment->course) {
+                return response()->json([
+                    'error' => 'Student is enrolled but has no course assigned',
+                    'student_id' => $student->id,
+                    'student_name' => $student->name,
+                    'enrollment_id' => $student->enrollment->id
+                ], 404);
+            }
+
+            $units = $student->enrollment->registeredUnits->map(function($unit) {
+                $grade = $unit->grades->first();
+                return [
+                    'id' => $unit->id,
+                    'title' => $unit->title,
+                    'cat' => $grade ? $grade->cat_marks : null,
+                    'exam' => $grade ? $grade->exam_marks : null
+                ];
+            });
+
+            return response()->json([
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'course' => [
+                        'id' => $student->enrollment->course->id,
+                        'name' => $student->enrollment->course->title
+                    ]
+                ],
+                'units' => $units,
+                'debug' => [
+                    'enrollment_id' => $student->enrollment->id,
+                    'course_id' => $student->enrollment->course->id,
+                    'units_count' => $units->count()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in getStudentDetails: ' . $e->getMessage(), [
+                'student_id' => $student->id,
+                'error' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'error' => 'An error occurred while fetching student details',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-    
 
-    return response()->json([
-        'student' => [
-            'id' => $student->id,
-            'name' => $student->name,
-            'email' => $student->email,
-            'course' => $student->course ? [
-                'id' => $student->course->id,
-                'name' => $student->course->name
-            ] : null
-        ],
-        'units' => $student->units->map(function($unit) {
-            return [
-                'id' => $unit->id,
-                'name' => $unit->title,
-                'code' => $unit->code,
-                'cat' => optional($unit->grades->first())->cat_marks,
-                'exam' => optional($unit->grades->first())->exam_marks
-            ];
-        })
-    ]);
-}
-public function submitGrades(Request $request)
-{
-    $validated = $request->validate([
-        'student_id' => 'required|exists:users,id',
-        'units' => 'required|array',
-        'units.*.cat' => 'nullable|numeric|min:0|max:30',
-        'units.*.exam' => 'nullable|numeric|min:0|max:70',
-        'teacher_comment' => 'nullable|string'
-    ]);
+    public function submitGrades(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:users,id',
+            'units' => 'required|array',
+            'units.*.cat' => 'nullable|numeric|min:0|max:30',
+            'units.*.exam' => 'nullable|numeric|min:0|max:70',
+            'teacher_comment' => 'nullable|string'
+        ]);
 
-    foreach ($validated['units'] as $unitId => $marks) {
-        Grade::updateOrCreate(
-            [
-                'student_id' => $validated['student_id'],
-                'unit_id' => $unitId,
-                'teacher_id' => auth()->id()
-            ],
-            [
-                'cat_marks' => $marks['cat'] ?? null,
-                'exam_marks' => $marks['exam'] ?? null,
-                'comments' => $validated['teacher_comment'] ?? null
-            ]
-        );
+        foreach ($validated['units'] as $unitId => $marks) {
+            Grade::updateOrCreate(
+                [
+                    'student_id' => $validated['student_id'],
+                    'unit_id' => $unitId,
+                    'teacher_id' => auth()->id()
+                ],
+                [
+                    'cat_marks' => $marks['cat'] ?? null,
+                    'exam_marks' => $marks['exam'] ?? null,
+                    'comments' => $validated['teacher_comment'] ?? null,
+                    'file_path' => 'grades/' . $validated['student_id'] . '/' . $unitId . '.pdf',
+                    'uploaded_at' => now()
+                ]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Grades submitted successfully');
     }
 
-    return redirect()->back()->with('success', 'Grades submitted successfully');
-}
+    public function getStudentUnits(Student $student)
+    {
+        $units = $student->units()
+            ->where('teacher_id', auth()->id())
+            ->get();
 
-public function getStudentUnits(Student $student)
-{
-    $units = $student->units()
-        ->where('teacher_id', auth()->id())
-        ->get();
+        return view('admin.teacher.student-units', compact('student', 'units'));
+    }
 
-    return view('admin.teacher.student-units', compact('student', 'units'));
-}
-
-private function isStudentInTeacherUnits(Student $student)
-{
-    return $student->units()->where('teacher_id', auth()->id())->exists();
-}
-
-    
+    private function isStudentInTeacherUnits(Student $student)
+    {
+        return $student->units()->where('teacher_id', auth()->id())->exists();
+    }
 }  

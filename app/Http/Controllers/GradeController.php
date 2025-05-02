@@ -25,7 +25,7 @@ class GradeController extends Controller
     {
         $request->validate([
             'grade_file' => 'required|file|mimes:csv,txt,xlsx|max:2048',
-            'unit_id' => 'required|exists:units,id,teacher_id,'.Auth::id()
+            'unit_id' => 'required|exists:units,id'
         ]);
 
         try {

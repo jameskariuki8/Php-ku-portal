@@ -19,6 +19,8 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
     
@@ -90,7 +92,7 @@ Route::prefix('teacher')->group(function () {
 });
 
 // Student routes group
-Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->group(function () {
+Route::prefix('student')->group(function () {
     // Enrollment routes
     Route::get('/enroll', [StudentEnrollmentController::class, 'index'])
         ->name('student.enroll');
@@ -112,6 +114,8 @@ Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->grou
         ->name('student.grades.download');
     Route::get('/grades/{grade}/view', [StudentGradeController::class, 'view'])
         ->name('student.grades.view');
+    Route::get('/grades/download-all', [StudentGradeController::class, 'downloadAll'])
+        ->name('student.grades.download-all');
 });
 
 require __DIR__.'/auth.php';

@@ -15,6 +15,10 @@ class CreateGradesTable extends Migration
             $table->foreignId('unit_id')->constrained();
             $table->string('file_path');
             $table->timestamp('uploaded_at');
+            $table->decimal('cat_marks', 5, 2)->nullable();
+            $table->decimal('exam_marks', 5, 2)->nullable();
+            $table->string('grade')->nullable();
+            $table->text('comments')->nullable();
             $table->timestamps();
         });
     }

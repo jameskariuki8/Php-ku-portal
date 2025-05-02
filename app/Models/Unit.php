@@ -27,17 +27,21 @@ class Unit extends Model
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
+
     public function registrations()
     {
         return $this->hasMany(StudentUnitRegistration::class, 'unit_id');
     }
-    // app/Models/Unit.php
-public function students()
-{
-    return $this->belongsToMany(User::class, 'student_unit_registrations', 'unit_id', 'enrollment_id')
-        ->using(StudentUnitRegistration::class)
-        ->where('role', 'student');
-}
 
+    public function enrolledStudents()
+    {
+        return $this->belongsToMany(StudentCourseEnrollment::class, 'student_unit_registrations', 'unit_id', 'enrollment_id')
+            ->using(StudentUnitRegistration::class)
+            ->withPivot(['status', 'registration_date']);
+    }
 
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
+    }
 }

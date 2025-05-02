@@ -72,7 +72,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <form action="{{ route('student.enroll', $enrollment->id) }}" method="POST">
+                                <form action="{{ route('student.enroll.destroy', $enrollment->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" 

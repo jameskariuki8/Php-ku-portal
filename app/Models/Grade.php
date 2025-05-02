@@ -14,7 +14,9 @@ class Grade extends Model
         'unit_id',
         'teacher_id',
         'grade',
-        'remarks'
+        'remarks',
+        'file_path',
+        'uploaded_at'
     ];
 
     public function student()

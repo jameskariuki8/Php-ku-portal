@@ -31,9 +31,9 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Available Units</h3>
                     
-                    @if($courseUnits->count() > 0)
+                    @if($availableUnits->count() > 0)
                         <div class="space-y-3">
-                            @foreach($courseUnits as $unit)
+                            @foreach($availableUnits as $unit)
                                 @if(!$registeredUnits->contains($unit))
                                     <div class="p-4 border border-gray-200 rounded-lg">
                                         <div class="flex justify-between items-start">

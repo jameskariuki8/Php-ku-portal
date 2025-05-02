@@ -61,55 +61,58 @@ class User extends Authenticatable
     }
 
     // app/Models/User.php
-public function enrollment()
-{
-    return $this->hasOne(StudentCourseEnrollment::class, 'student_id');
-}
+    public function enrollment()
+    {
+        return $this->hasOne(StudentCourseEnrollment::class, 'student_id');
+    }
 
-public function course()
-{
-    return $this->hasOneThrough(
-        Course::class,
-        StudentCourseEnrollment::class,
-        'student_id', // Foreign key on enrollments table
-        'id', // Foreign key on courses table
-        'id', // Local key on users table
-        'course_id' // Local key on enrollments table
-    );
-}
-// In User.php
-public function enrolledCourse()
-{
-    return $this->enrollment();
-}
+    public function course()
+    {
+        return $this->hasOneThrough(
+            Course::class,
+            StudentCourseEnrollment::class,
+            'student_id',
+            'id',
+            'id',
+            'course_id'
+        );
+    }
 
+    public function enrolledCourse()
+    {
+        return $this->hasOneThrough(
+            Course::class,
+            StudentCourseEnrollment::class,
+            'student_id',
+            'id',
+            'id',
+            'course_id'
+        );
+    }
 
-public function unitRegistrations()
-{
-    return $this->hasMany(StudentUnitRegistration::class, 'enrollment_id', 'id');
-}
+    public function unitRegistrations()
+    {
+        return $this->hasManyThrough(
+            StudentUnitRegistration::class,
+            StudentCourseEnrollment::class,
+            'student_id',
+            'enrollment_id',
+            'id',
+            'id'
+        );
+    }
 
-// In User.php
-public function units()
-{
-    return $this->hasManyThrough(
-        Unit::class,
-        StudentUnitRegistration::class,
-        'enrollment_id',
-        'id',
-        'id',
-        'unit_id'
-    );
-}
-// app/Models/User.php
-public function enrolledUnits()
-{
-    return $this->belongsToMany(Unit::class, 'student_unit_registrations', 'enrollment_id', 'unit_id')
-        ->using(StudentUnitRegistration::class)
-        ->withPivot(['created_at', 'updated_at']);
-}
+    public function units()
+    {
+        return $this->belongsToMany(Unit::class, 'student_unit_registrations', 'enrollment_id', 'unit_id')
+            ->using(StudentUnitRegistration::class)
+            ->withPivot(['status', 'registration_date']);
+    }
 
-
-
-
+    public function enrolledUnits()
+    {
+        return $this->belongsToMany(Unit::class, 'student_unit_registrations', 'enrollment_id', 'unit_id')
+            ->using(StudentUnitRegistration::class)
+            ->withPivot(['status', 'registration_date']);
+    }
 }

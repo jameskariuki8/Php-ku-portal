@@ -83,15 +83,14 @@
                     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-2">Welcome back, {{ auth()->user()->name }}</h3>
                         
-                                 @if(auth()->user()->enrolledCourse)
+                        @if(auth()->user()->enrolledCourse)
                             <div class="mt-4 p-4 bg-blue-50 rounded-lg">
                                 <h4 class="font-medium text-blue-800">Currently Enrolled In:</h4>
-                                <p class="text-lg mt-1">{{ auth()->user()->enrolledCourse->course->title }}</p>
+                                <p class="text-lg mt-1">{{ auth()->user()->enrolledCourse->title }}</p>
                                 <p class="text-sm text-gray-600 mt-1">
-                                {{ auth()->user()->enrollment?->unitRegistrations?->count() ?? 0 }} units registered
+                                    {{ auth()->user()->enrollment?->unitRegistrations?->count() ?? 0 }} units registered
                                 </p>
 
-                                
                                 <div class="mt-4 space-x-3">
                                     <a href="{{ route('student.units.index') }}" 
                                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">
@@ -124,7 +123,7 @@
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Enrolled Course</p>
                                     <p class="text-xl font-semibold text-gray-900">
-                                        {{ auth()->user()->enrolledCourse ? auth()->user()->enrolledCourse->course->title : 'None' }}
+                                        {{ auth()->user()->enrolledCourse ? auth()->user()->enrolledCourse->title : 'None' }}
                                     </p>
                                 </div>
                             </div>
@@ -136,12 +135,11 @@
                                     <i class="fas fa-tasks fa-lg"></i>
                                 </div>
                                 <div>
-    <p class="text-sm font-medium text-gray-500">Registered Units</p>
-    <p class="text-xl font-semibold text-gray-900">
-        {{ auth()->user()->enrollment?->unitRegistrations?->count() ?? 0 }}
-    </p>
-</div>
-
+                                    <p class="text-sm font-medium text-gray-500">Registered Units</p>
+                                    <p class="text-xl font-semibold text-gray-900">
+                                        {{ auth()->user()->enrollment?->unitRegistrations?->count() ?? 0 }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         
@@ -173,13 +171,13 @@
                                     </div>
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-gray-900">
-                                            Registered for {{ $registration->unit->title }}
+                                            Registered for {{ $registration->unit?->title ?? 'Unknown Unit' }}
                                         </p>
                                         <p class="text-sm text-gray-500">
-                                            {{ $registration->unit->course->title }}
+                                            {{ $registration->unit?->course?->title ?? 'Unknown Course' }}
                                         </p>
                                         <p class="text-xs text-gray-400 mt-1">
-                                            {{ $registration->created_at->diffForHumans() }}
+                                            {{ $registration->created_at?->diffForHumans() ?? 'Unknown time' }}
                                         </p>
                                     </div>
                                 </div>

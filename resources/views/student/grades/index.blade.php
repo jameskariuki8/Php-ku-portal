@@ -9,6 +9,16 @@
             <h2 class="text-2xl font-semibold mb-6">My Grades</h2>
             
             @if($grades->isNotEmpty())
+                <div class="mb-4">
+                    <a href="{{ route('student.grades.download-all') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download All Grades
+                    </a>
+                </div>
+                
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -22,11 +32,11 @@
                             @foreach($grades as $grade)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $grade->unit->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $grade->unit->code }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $grade->unit->title }}</div>
+                                    <div class="text-sm text-gray-500">CAT: {{ $grade->cat_marks ?? 'N/A' }} | Exam: {{ $grade->exam_marks ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $grade->uploaded_at->format('M d, Y') }}
+                                    {{ \Carbon\Carbon::parse($grade->uploaded_at)->format('M d, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <a href="{{ route('student.grades.download', $grade->id) }}" 
