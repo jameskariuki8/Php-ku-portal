@@ -110,7 +110,7 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('admin.teacher.grades') }}" class="p-6 border rounded-lg hover:bg-gray-50 transform transition duration-300 hover:scale-105">
+                    <a href="{{ route('admin.teacher.students') }}" class="p-6 border rounded-lg hover:bg-gray-50 transform transition duration-300 hover:scale-105">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
                                 <div class="p-3 rounded-full bg-purple-100 text-purple-600">

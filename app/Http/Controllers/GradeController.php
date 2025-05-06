@@ -36,15 +36,17 @@ class GradeController extends BaseController
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $this->checkTeacherRole();
-        
-        $units = Unit::with('students')
-            ->where('teacher_id', auth()->id())
-            ->get();
-            
-        return view('admin.teacher.grades.index', compact('units'));
-    }
+{
+    $this->checkTeacherRole();
+
+    // Get all grades for units taught by the teacher
+    $grades = \App\Models\Grade::with(['student', 'unit'])
+        ->where('teacher_id', auth()->id())
+        ->get();
+
+    return view('admin.teacher.grades.index', compact('grades'));
+}
+
 
     /**
      * Upload grades via file (CSV/Excel)

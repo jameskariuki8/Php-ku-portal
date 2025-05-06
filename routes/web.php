@@ -70,7 +70,7 @@ Route::prefix('teacher')->group(function () {
     Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('admin.teacher.units.destroy');
     
     // Students management
-    Route::get('/students', [TeacherController::class, 'dashboard'])->name('admin.teacher.students');
+    Route::get('/students', [TeacherController::class, 'students'])->name('admin.teacher.students');
     
     // Grades management
     Route::get('/grades', [GradeController::class, 'index'])->name('admin.teacher.grades');
