@@ -58,29 +58,19 @@ class TeacherController extends Controller
         return view('teacher.enrollments', compact('enrollments'));
     }
 
+    
     public function dashboard()
     {
         $teacher = auth()->user();
-    
-        // Get only students enrolled in units taught by this teacher
-        $students = User::where('role', 'student')
-            ->whereHas('enrollment.unitRegistrations.unit', function ($query) use ($teacher) {
-                $query->where('teacher_id', $teacher->id);
-            })
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
-    
-        // Get units this teacher teaches
-        $units = Unit::where('teacher_id', $teacher->id)->get();
-    
-        // Get grades
-        $grades = Grade::with(['student:id,name', 'unit:id,title'])
-            ->where('teacher_id', $teacher->id)
-            ->latest()
-            ->get();
-    
-        return view('admin.teacher.dashboard', compact('students', 'units', 'grades'));
+        
+        // Get counts for the dashboard
+        $studentCount = $teacher->students()->count();
+        $unitCount = $teacher->taughtUnits()->count();
+        $gradeCount = $teacher->grades()->count();
+        
+        return view('admin.teacher.dashboard', compact('studentCount', 'unitCount', 'gradeCount'));
     }
+
 
     public function getStudentDetails(User $student)
     {
@@ -115,7 +105,9 @@ class TeacherController extends Controller
                 $grade = $unit->grades->first();
                 return [
                     'id' => $unit->id,
-                    'title' => $unit->title,
+                    'name' => $unit->title, // Changed from 'title' to 'name'
+                    'code' => $unit->code ?? 'N/A', // Add unit code if available
+                    'title' => $unit->title, // Keep original title if needed
                     'cat' => $grade ? $grade->cat_marks : null,
                     'exam' => $grade ? $grade->exam_marks : null
                 ];
@@ -193,5 +185,33 @@ class TeacherController extends Controller
     private function isStudentInTeacherUnits(Student $student)
     {
         return $student->units()->where('teacher_id', auth()->id())->exists();
+    }
+
+    public function students()
+    {
+        $teacher = auth()->user();
+    
+        // Get only students enrolled in units taught by this teacher
+        $students = User::where('role', 'student')
+            ->whereHas('enrollment.unitRegistrations.unit', function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+    
+        return view('admin.teacher.students', compact('students'));
+    }
+
+    public function grades()
+    {
+        $teacher = auth()->user();
+    
+        // Get grades for students in this teacher's units
+        $grades = Grade::with(['student:id,name', 'unit:id,title'])
+            ->where('teacher_id', $teacher->id)
+            ->latest()
+            ->get();
+    
+        return view('admin.teacher.grades', compact('grades'));
     }
 }  

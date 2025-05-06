@@ -18,6 +18,11 @@ class Grade extends Model
         'file_path',
         'uploaded_at'
     ];
+    protected $casts = [
+        'uploaded_at' => 'datetime',
+        'cat_marks' => 'float',
+        'exam_marks' => 'float'
+    ];
 
     public function student()
     {

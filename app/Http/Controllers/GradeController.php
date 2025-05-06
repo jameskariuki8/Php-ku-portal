@@ -9,13 +9,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\GradesImport;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Gate;
 
-class GradeController extends Controller
+class GradeController extends BaseController
 {
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:teacher');
+    }
+
+    /**
+     * Check if user is authorized as a teacher
+     */
+    private function checkTeacherRole()
+    {
+        if (Auth::user()->role !== 'teacher') {
+            abort(403, 'Unauthorized action. Only teachers can access this resource.');
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $this->checkTeacherRole();
+        
+        $units = Unit::with('students')
+            ->where('teacher_id', auth()->id())
+            ->get();
+            
+        return view('admin.teacher.grades.index', compact('units'));
     }
 
     /**
@@ -23,68 +51,88 @@ class GradeController extends Controller
      */
     public function upload(Request $request)
     {
+        $this->checkTeacherRole();
+        
         $request->validate([
             'grade_file' => 'required|file|mimes:csv,txt,xlsx|max:2048',
             'unit_id' => 'required|exists:units,id'
         ]);
 
         try {
-            $unit = Unit::findOrFail($request->unit_id);
             $file = $request->file('grade_file');
+            $unit = Unit::findOrFail($request->unit_id);
             
-            // Process the file (example for CSV)
-            $path = $file->getRealPath();
-            $data = array_map('str_getcsv', file($path));
-            
-            $header = array_shift($data);
-            $grades = [];
-            
-            foreach ($data as $row) {
-                $grades[] = array_combine($header, $row);
+            // Verify the teacher owns this unit
+            if ($unit->teacher_id !== auth()->id()) {
+                return back()->with('error', 'You are not authorized to upload grades for this unit.');
             }
+
+            // Store the file
+            $path = $file->store('grade_uploads');
             
-            // Validate and store grades
-            $processed = 0;
-            foreach ($grades as $gradeData) {
-                $validator = Validator::make($gradeData, [
-                    'student_id' => [
-                        'required',
-                        Rule::exists('users', 'id')->where(function ($query) {
-                            $query->where('role', 'student');
-                        })
-                    ],
-                    'cat_marks' => 'nullable|numeric|min:0|max:30',
-                    'exam_marks' => 'nullable|numeric|min:0|max:70',
-                    'comments' => 'nullable|string|max:255'
-                ]);
-                
-                if ($validator->fails()) continue;
-                
-                Grade::updateOrCreate(
-                    [
-                        'student_id' => $gradeData['student_id'],
-                        'unit_id' => $unit->id,
-                        'teacher_id' => Auth::id()
-                    ],
-                    [
-                        'cat_marks' => $gradeData['cat_marks'] ?? null,
-                        'exam_marks' => $gradeData['exam_marks'] ?? null,
-                        'comments' => $gradeData['comments'] ?? null,
-                        'grade' => $this->calculateGrade(
-                            $gradeData['cat_marks'] ?? 0,
-                            $gradeData['exam_marks'] ?? 0
-                        )
-                    ]
-                );
-                
-                $processed++;
-            }
+            // Import the grades
+            Excel::import(new GradesImport($unit->id), $path);
             
-            return back()->with('success', "Successfully processed $processed grades");
+            // Delete the file after import
+            Storage::delete($path);
             
+            return back()->with('success', 'Grades uploaded successfully!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error processing file: '.$e->getMessage());
+            return back()->with('error', 'Error uploading grades: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Display the grade upload form
+     */
+    public function showUploadForm()
+    {
+        $this->checkTeacherRole();
+        
+        $units = Unit::where('teacher_id', auth()->id())->get();
+        return view('admin.teacher.upload-grades', compact('units'));
+    }
+
+    /**
+     * Display grades for a specific unit
+     */
+    public function showUnitGrades(Unit $unit)
+    {
+        $this->checkTeacherRole();
+        
+        // Verify the teacher owns this unit
+        if ($unit->teacher_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $grades = Grade::with('student')
+            ->where('unit_id', $unit->id)
+            ->get();
+
+        return view('admin.teacher.unit-grades', compact('unit', 'grades'));
+    }
+
+    /**
+     * Update individual grade
+     */
+    public function update(Request $request, Grade $grade)
+    {
+        $this->checkTeacherRole();
+        
+        // Verify the teacher owns this grade
+        if ($grade->teacher_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'cat_marks' => 'nullable|numeric|min:0|max:30',
+            'exam_marks' => 'nullable|numeric|min:0|max:70',
+            'comments' => 'nullable|string'
+        ]);
+
+        $grade->update($request->only(['cat_marks', 'exam_marks', 'comments']));
+
+        return back()->with('success', 'Grade updated successfully!');
     }
 
     /**
@@ -146,31 +194,5 @@ class GradeController extends Controller
             ->get();
             
         return view('admin.teacher.grades.unit', compact('unit', 'grades'));
-    }
-
-    /**
-     * Update individual grade
-     */
-    public function update(Request $request, Grade $grade)
-    {
-        $this->authorize('update', $grade);
-        
-        $validated = $request->validate([
-            'cat_marks' => 'nullable|numeric|min:0|max:30',
-            'exam_marks' => 'nullable|numeric|min:0|max:70',
-            'comments' => 'nullable|string|max:255'
-        ]);
-        
-        $grade->update([
-            'cat_marks' => $validated['cat_marks'],
-            'exam_marks' => $validated['exam_marks'],
-            'comments' => $validated['comments'],
-            'grade' => $this->calculateGrade(
-                $validated['cat_marks'] ?? 0,
-                $validated['exam_marks'] ?? 0
-            )
-        ]);
-        
-        return back()->with('success', 'Grade updated successfully');
     }
 }

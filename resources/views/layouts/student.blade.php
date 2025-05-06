@@ -34,7 +34,7 @@
                 </a>
                 @endif
                 
-                <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
+                <a href="{{ route('student.grades.index') }}" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">
                     <i class="fas fa-chart-bar mr-3"></i> View Results
                 </a>
                 <a href="#" class="block px-6 py-3 text-indigo-200 hover:bg-indigo-700 hover:text-white transition duration-200">

@@ -14,11 +14,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Dashboard Routes
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 
 
 // Authenticated Routes
@@ -74,6 +69,12 @@ Route::prefix('teacher')->group(function () {
     Route::put('/units/{unit}', [UnitController::class, 'update'])->name('admin.teacher.units.update');
     Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('admin.teacher.units.destroy');
     
+    // Students management
+    Route::get('/students', [TeacherController::class, 'dashboard'])->name('admin.teacher.students');
+    
+    // Grades management
+    Route::get('/grades', [GradeController::class, 'index'])->name('admin.teacher.grades');
+    
     // Grade management routes
     Route::get('/student-details/{student}', [TeacherController::class, 'getStudentDetails'])
         ->name('teacher.student.details');
@@ -97,7 +98,9 @@ Route::prefix('student')->group(function () {
     Route::get('/enroll', [StudentEnrollmentController::class, 'index'])
         ->name('student.enroll');
     Route::post('/enroll', [StudentEnrollmentController::class, 'store']);
-    Route::delete('/enroll/{enrollment}', [StudentEnrollmentController::class, 'destroy']);
+    Route::delete('/student/enroll/{enrollment}', [StudentEnrollmentController::class, 'destroy'])
+    ->name('student.enroll.destroy');
+
     
     // Unit registration routes
     Route::get('/units', [UnitRegistrationController::class, 'index'])

@@ -44,4 +44,13 @@ class Unit extends Model
     {
         return $this->hasMany(Grade::class);
     }
+
+    /**
+     * Get the students enrolled in this unit.
+     */
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'enrollments', 'unit_id', 'student_id')
+            ->where('role', 'student');
+    }
 }

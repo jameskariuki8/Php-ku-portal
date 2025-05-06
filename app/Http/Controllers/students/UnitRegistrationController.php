@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Students;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 use App\Http\Controllers\Controller;
 use App\Models\StudentCourseEnrollment;
@@ -88,7 +89,10 @@ class UnitRegistrationController extends Controller
             ->where('unit_id', $unitId)
             ->firstOrFail();
         
-        $this->authorize('delete', $registration);
+        if (auth()->id() !== $registration->enrollment->student_id) {
+                abort(403, 'Unauthorized action.');
+            }
+            
         
         $this->validateDropPeriod($registration);
         

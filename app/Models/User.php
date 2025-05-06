@@ -115,4 +115,23 @@ class User extends Authenticatable
             ->using(StudentUnitRegistration::class)
             ->withPivot(['status', 'registration_date']);
     }
+
+    public function students()
+    {
+        return User::where('role', 'student')
+            ->whereHas('enrollment.unitRegistrations.unit', function ($query) {
+                $query->where('teacher_id', $this->id);
+            });
+    }
+
+    public function taughtUnits()
+    {
+        return $this->hasMany(Unit::class, 'teacher_id');
+    }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class, 'teacher_id');
+    }
+    
 }
