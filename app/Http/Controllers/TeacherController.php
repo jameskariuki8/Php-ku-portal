@@ -144,34 +144,49 @@ class TeacherController extends Controller
     }
 
     public function submitGrades(Request $request)
-    {
-        $validated = $request->validate([
-            'student_id' => 'required|exists:users,id',
-            'units' => 'required|array',
-            'units.*.cat' => 'nullable|numeric|min:0|max:30',
-            'units.*.exam' => 'nullable|numeric|min:0|max:70',
-            'teacher_comment' => 'nullable|string'
-        ]);
+{
+    $validated = $request->validate([
+        'student_id' => 'required|exists:users,id',
+        'units' => 'required|array',
+        'units.*.cat' => 'nullable|numeric|min:0|max:30',
+        'units.*.exam' => 'nullable|numeric|min:0|max:70',
+        'teacher_comment' => 'nullable|string'
+    ]);
 
-        foreach ($validated['units'] as $unitId => $marks) {
-            Grade::updateOrCreate(
-                [
-                    'student_id' => $validated['student_id'],
-                    'unit_id' => $unitId,
-                    'teacher_id' => auth()->id()
-                ],
-                [
-                    'cat_marks' => $marks['cat'] ?? null,
-                    'exam_marks' => $marks['exam'] ?? null,
-                    'comments' => $validated['teacher_comment'] ?? null,
-                    'file_path' => 'grades/' . $validated['student_id'] . '/' . $unitId . '.pdf',
-                    'uploaded_at' => now()
-                ]
+    $student = \App\Models\User::find($validated['student_id']);
+
+    foreach ($validated['units'] as $unitId => $marks) {
+        $cat = $marks['cat'] ?? 0;
+        $exam = $marks['exam'] ?? 0;
+        $gradeLetter = $this->calculateGrade($cat, $exam);
+
+        $grade = Grade::updateOrCreate(
+            [
+                'student_id' => $validated['student_id'],
+                'unit_id' => $unitId,
+                'teacher_id' => auth()->id()
+            ],
+            [
+                'cat_marks' => $cat,
+                'exam_marks' => $exam,
+                'grade' => $gradeLetter,
+                'comments' => $validated['teacher_comment'] ?? null,
+                'file_path' => 'grades/' . $validated['student_id'] . '/' . $unitId . '.pdf',
+                'uploaded_at' => now()
+            ]
+        );
+
+        // Send notification email
+        if ($student && $student->email) {
+            \Mail::to($student->email)->send(
+                new \App\Mail\GradeNotification($grade, 'Your grade for the unit has been submitted.')
             );
         }
-
-        return redirect()->back()->with('success', 'Grades submitted successfully');
     }
+
+    return redirect()->back()->with('success', 'Grades submitted and notifications sent successfully');
+}
+
 
     public function getStudentUnits(Student $student)
     {
@@ -214,4 +229,16 @@ class TeacherController extends Controller
     
         return view('admin.teacher.grades', compact('grades'));
     }
+
+    private function calculateGrade($catMarks, $examMarks)
+    {
+        $total = ($catMarks ?? 0) + ($examMarks ?? 0);
+        
+        if ($total >= 70) return 'A';
+        if ($total >= 60) return 'B';
+        if ($total >= 50) return 'C';
+        if ($total >= 40) return 'D';
+        return 'F';
+    }
+    
 }  

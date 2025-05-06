@@ -14,7 +14,7 @@ class StudentEnrollmentController extends Controller
 {
     $enrollment = auth()->user()->load('enrollment.course')->enrollment;
 
-   $courses = Course::all(); // or however you're retrieving course options
+   $courses = Course::all(); 
 
 return view('student.enroll.index', compact('enrollment', 'courses'));
 

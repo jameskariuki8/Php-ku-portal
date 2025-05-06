@@ -24,7 +24,7 @@ A comprehensive role-based authentication system built with Laravel, featuring s
 
 1. **Clone the repository**
    ```bash
-   git clone [repository-url]
+   git clone https://github.com/jameskariuki8/Php-ku-portal.git
    cd RoleBasedAuth
    ```
 

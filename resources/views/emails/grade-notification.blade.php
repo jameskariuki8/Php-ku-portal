@@ -17,9 +17,10 @@ Your grade for **{{ $grade->unit->title }}** has been recorded:
 {{ $message }}
 @endif
 
-@component('mail::button', ['url' => route('student.grades.view')])
-View All Grades
+@component('mail::button', ['url' => route('student.grades.view', ['grade' => $grade->id])])
+View Grade Details
 @endcomponent
+
 
 Thanks,  
 {{ config('app.name') }} Team
